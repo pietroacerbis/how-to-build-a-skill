@@ -230,6 +230,14 @@ Ask `review-skill` to review it, or walk [SKILL-FORMAT.md](SKILL-FORMAT.md) sect
 
 Do the same before installing a skill you did not write. A skill runs with your permissions, so `review-skill` reads every file for hidden instructions, secrets read and data sent out, and never runs any of them. Its verdict is one of three: install, fix first, or do not install.
 
+## The Skill kit
+
+This repository is one of three:
+
+- How to build a skill: this one.
+- [Claude personal memory](https://github.com/pietroacerbis/claude-personal-memory): Claude that remembers who you are and what you corrected, in plain files you own.
+- [Claude Code plugins](https://github.com/pietroacerbis/claude-code-plugins): the plugins we use, and others worth trying, by category.
+
 <!-- CTA -->
 ---
 
