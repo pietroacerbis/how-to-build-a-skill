@@ -21,16 +21,6 @@ model: sonnet
 
 One skill for every call. The **type** is resolved first, and everything downstream reads off it: the type names one file in `variants/`, and that file declares what to extract and which sections the summary adds.
 
-## When to use
-
-- After a conversation that left a transcript or notes, pasted or exported from a recorder.
-- One call per run. Two transcripts pasted together get two runs.
-
-## Not for
-
-- A call that has not happened yet: prepare it in plain chat.
-- A document, an email thread, an article.
-
 ## How it works
 
 The scripts live in this skill's folder: run them from there, with `--calls-dir` pointing at the project's `calls/`.
@@ -74,7 +64,7 @@ Open only the variant file of the type. It declares the fields, the sections and
 
 Read [worked-examples/quality-bar.md](worked-examples/quality-bar.md) before the first quote. **Every quote is verbatim**: a line that fails the quality bar is paraphrased and said to be a paraphrase.
 
-Dates, deadlines and the order between actions come from the call. An action with no date says `no date given`.
+Dates, deadlines and the order between actions come from the call. An action with no date says `no date given`. The summary describes the call: the day you process it, and what has happened since, go in `## Provenance` only.
 
 ### Stop 4, check
 
@@ -108,7 +98,7 @@ The spine, in this order. A section the type declared and the call left empty ca
 | `## Actions` | owner and date, ours and theirs kept apart |
 | `## Quotes` | verbatim, with the speaker |
 | variant sections | in the order the variant lists them |
-| `## Next steps` | what has to happen, with its date when the call gave one |
+| `## Next steps` | only the steps the call dated, one per line, opening with the date. Undated actions stay in `## Actions` |
 | `## Provenance` | the source, the lookback line, the gaps, the knowledge files missing, Slack posted or printed |
 
 Personal contact details (emails, phone numbers) never enter the summary. Name, role and company do.

@@ -34,7 +34,7 @@ TODO - "a verbatim quote" (Speaker)
 
 {variant_sections}## Next steps
 
-TODO what has to happen next, with its date when the call gave one.
+TODO - YYYY-MM-DD: a step the call dated, one per line. Undated actions stay in Actions.
 
 ## Provenance
 

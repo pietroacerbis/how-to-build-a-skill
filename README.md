@@ -74,33 +74,41 @@ Three files are required, the rest only when the skill needs them. Copy [templat
 
 ### The frontmatter
 
-Each field answers a question someone will ask about the skill. Every field is in the [template](template/my-skill/SKILL.md).
+Each field answers a question someone will ask about the skill. A few are read by Claude to decide when and how to run it. The others describe the skill to you, your team and your tools. Every field is in the [template](template/my-skill/SKILL.md).
 
-| Field | Answers |
-|---|---|
-| `name` | what it is called: a verb, kebab-case, the same as the folder |
-| `description` | when Claude should run it: verb first, the main use case first, and a `Not for:` line |
-| `when_to_use` | the phrases a user types, in any language |
-| `goal` | the intent, in one line |
-| `outcome` | the exact path of what it writes |
-| `inputs` | what it needs: `required` stops the run when missing, `recommended` lets it continue and flag the gap |
-| `tier` | who it serves: `personal`, `shared` with the team, or `infrastructure` when it writes a system everyone uses |
-| `validation` | how you know it works: `verifiable` by its evals, or `outcome-anchored` when only results over weeks can tell |
-| `status` | `draft`, `active`, `deprecated`, moved by a person, never by a date |
-| `mcps_used` | the tools it calls |
-| `feeds_into` | the skills that read its output |
+| Field | Answers | Read by |
+|---|---|---|
+| `name` | what it is called: a verb, kebab-case, the same as the folder | Claude |
+| `description` | what it does and when Claude should run it: verb first, the main use case first, and a `Not for:` line | Claude |
+| `when_to_use` | the phrases a user types, in any language | Claude |
+| `model` | the model to switch to while the skill runs, optional | Claude |
+| `goal` | the intent, in one line | you |
+| `outcome` | the exact path of what it writes | you |
+| `inputs` | what it needs: `required` stops the run when missing, `recommended` lets it continue and flag the gap | you |
+| `tier` | who it serves: `personal`, `shared` with the team, or `infrastructure` when it writes a system everyone uses | you |
+| `validation` | how you know it works: `verifiable` by its evals, or `outcome-anchored` when only results over weeks can tell | you |
+| `status` | `draft`, `active`, `deprecated`, moved by a person, never by a date | you |
+| `mcps_used` | the tools it calls | you |
+| `feeds_into` | the skills that read its output | you |
 
 The `description` and `when_to_use` together stay under 1,536 characters. When in doubt, describe more: a skill that never fires is worse than one that fires too often.
 
+**Where you run the skill decides which fields it can carry:**
+
+| You run it in | The frontmatter |
+|---|---|
+| Claude Code, in the terminal or an IDE such as VS Code | every field above loads. Claude skips the ones it does not use, without errors |
+| claude.ai or the Skills API | only `name`, `description`, `license`, `compatibility`, `metadata` and `allowed-tools`. Any other field stops the upload with an error, so the phrases of `when_to_use` move into `description` |
+
 ### The body
 
-The body is a **path**: the steps Claude walks, and the files it opens on the way. Five sections, always in this order:
+The body is a **path**: the steps Claude walks, and the files it opens on the way. Three sections, always in this order:
 
-1. `## When to use`
-2. `## Not for`, with the skill to use instead
-3. `## How it works`, the stops, numbered from 0
-4. `## Output`, the exact path, and what happens when the skill stops
-5. `## References`, every file the skill opens, one line each
+1. `## How it works`, the stops, numbered from 0
+2. `## Output`, the exact path, and what happens when the skill stops
+3. `## References`, every file the skill opens, one line each
+
+When to use the skill, and when not, lives in the frontmatter only. Claude loads the body after it has picked the skill, so a `## When to use` section there never helps it pick: Anthropic's own skill-creator puts all of it in the description.
 
 Keep it under 200 lines. A longer body is carrying knowledge or examples that belong in another file. While you write it:
 
@@ -139,7 +147,7 @@ The signal is Claude rebuilding the same logic on every run, or getting a mechan
 |---|---|---|
 | `lookback.py` | finds earlier summaries with the same counterpart, refuses a second summary of the same call | a lost thread, a duplicate file |
 | `new_summary.py` | builds the path from the date of the call and writes the empty summary | a call from October filed in November |
-| `check_summary.py` | checks every quote word for word against the transcript, the sections, the length, no email or phone number | invented quotes, summaries three times too long, personal data |
+| `check_summary.py` | checks every quote word for word against the transcript, the sections, the length, the dates, no email or phone number | invented quotes, a renewal dated in the wrong year, summaries three times too long, personal data |
 
 The last one runs as a **validation loop**: check, fix what it prints, check again, deliver only when it passes.
 
@@ -189,7 +197,7 @@ Every run that needs a correction teaches the skill something. `memory.md` is wh
 
 `status` moves to `active` when a person has seen it run with its evals passing.
 
-A real loop from the example: the first full run of its evals caught a summary writing a deadline the call never set. One line in `memory.md`, read at stop 0, and the case passed three runs out of three.
+A real loop from the example. The evals caught a summary writing a deadline the call never set, and a line in `memory.md` fixed it for the next runs. A later run wrote another invented deadline, and dated a renewal "on the first of March", said in November, in the current year. The same correction twice, so it became code: `check_summary.py` now fails a step dated before the call, and a next step with no date.
 
 ## 10. Chains
 

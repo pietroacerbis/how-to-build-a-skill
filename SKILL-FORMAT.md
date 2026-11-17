@@ -22,7 +22,7 @@ A skill is a **doer that carries the path, never the knowledge**. It orders the 
 ```yaml
 ---
 name: process-call                    # kebab-case, the folder name
-description: <verb first, key use case first, triggers, "Not for:">
+description: <verb first, key use case first, "Not for:">
 when_to_use: <trigger phrases and example requests, any language>
 goal: <one line, the intent>
 outcome: <the artifact and its EXACT path>
@@ -51,6 +51,8 @@ model: sonnet                         # optional hint
 | `status` | moved by a person, never by a clock: `draft` by the author, `active` once it ran with passing evals, `deprecated` with its replacement named |
 | `feeds_into` | documents who reads the output. It never routes |
 
+**Where the skill runs.** Claude Code, in the terminal or an IDE, loads every field: Claude acts on `name`, `description`, `when_to_use` and `model`, and skips the rest without errors. claude.ai and the Skills API accept only `name`, `description`, `license`, `compatibility`, `metadata` and `allowed-tools`, and refuse the upload on any other field: there the phrases of `when_to_use` move into `description`.
+
 ## 4. Folder anatomy
 
 ```
@@ -76,7 +78,7 @@ model: sonnet                         # optional hint
 
 The body is the path: the stops in order and the file each opens. Under 200 lines, with zero copied knowledge: a longer body is carrying something that belongs in another file.
 
-**Sections, in this order:** `## When to use`, `## Not for`, `## How it works` (the stops), `## Output` (the path and the STOP record), `## References` (one line per file the skill opens).
+**Sections, in this order:** `## How it works` (the stops), `## Output` (the path and the STOP record), `## References` (one line per file the skill opens). When to use the skill, and when not, lives in `description` and `when_to_use` only: the body loads after Claude has picked the skill.
 
 - **A stop opens one variant of one file**, never a whole folder.
 - **Three sources or more open at once: add a compaction stop.** The skill writes a short brief scoped to this run, and the later stops work from the brief.
@@ -111,7 +113,7 @@ The body is the path: the stops in order and the file each opens. Under 200 line
 | 4 | `inputs` split into `required` and `recommended` |
 | 5 | `tier`, `validation` and `status` set |
 | 6 | `SKILL.md`, `evals/` and `memory.md` present |
-| 7 | `SKILL.md` under 200 lines, with the five sections in order |
+| 7 | `SKILL.md` under 200 lines, with the three sections in order and no `## When to use` in the body |
 | 8 | variants, if any, one file each in `variants/`, picked at stop 0 |
 | 9 | every stop opens one file, and every file opened is in `## References` |
 | 10 | no company knowledge inside the folder: the residency test passes on every file |

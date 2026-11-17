@@ -1,6 +1,6 @@
 ---
 name: my-skill                        # a verb, kebab-case, the same as the folder
-description: "Verb the main output for the main use case. Use when the user says 'phrase one', 'phrase two', or pastes X. Not for: Y (use other-skill)."
+description: "Verb the main output for the main use case, in one sentence. Not for: Y (use other-skill)."
 when_to_use: "The phrases a user types, in any language: 'phrase one', 'phrase two'."
 goal: "The intent, in one line."
 outcome: "output/YYYY-MM/YYYY-MM-DD-{slug}.md"
@@ -19,14 +19,6 @@ last_updated: YYYY-MM-DD
 # my-skill
 
 One line: what this skill produces and where it puts it.
-
-## When to use
-
-- What does the user say or paste when this skill should run?
-
-## Not for
-
-- What looks similar and belongs to another skill? Name that skill.
 
 ## How it works
 
