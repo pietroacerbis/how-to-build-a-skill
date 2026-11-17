@@ -1,65 +1,129 @@
 ---
 name: process-call
-description: "Turn a call transcript into a dated summary with verbatim quotes, actions with owners and next steps, then post a short update to Slack. Use when the user pastes a transcript or meeting notes, or says 'process this call', 'summarize this meeting', 'log my call with X'. Handles prospect, customer and internal calls. Not for: preparing a call that has not happened yet, or material that is not a conversation."
-license: MIT
+description: "Process a call transcript end to end: resolve the type of call, reload the earlier thread, extract what that type declares with verbatim quotes, write the dated summary to calls/, and post a short update to Slack. Handles prospect, customer and internal calls. Not for: preparing a call that has not happened yet (plain chat), material that is not a conversation, two calls in one run."
+when_to_use: "After any conversation that left a transcript or notes. Triggers: 'process this call', 'summarize this meeting', 'log my call with X', 'processa questa call', 'ho fatto una call con X', or pasting a transcript or raw meeting notes."
+goal: "Turn one conversation into a summary somebody can act on, plus the update the team reads."
+outcome: "calls/{YYYY-MM}/YYYY-MM-DD-{type}-{slug}.md, plus the Slack update"
+inputs:
+  required: [transcript]
+  recommended: [call-date, counterpart]
+tier: personal
+validation: verifiable
+status: active
+mcps_used: [slack]
+feeds_into: []
+version: 1
+last_updated: 2026-11-17
+model: sonnet
 ---
 
 # process-call
 
-One call in, one summary out at `calls/YYYY-MM/YYYY-MM-DD-{type}-{slug}.md`, plus a Slack update.
+One skill for every call. The **type** is resolved first, and everything downstream reads off it: the type names one file in `variants/`, and that file declares what to extract and which sections the summary adds.
 
 ## When to use
 
-- The user pastes a transcript or notes from a call, or a call recorder export.
-- One call per run. Two transcripts: two runs.
+- After a conversation that left a transcript or notes, pasted or exported from a recorder.
+- One call per run. Two transcripts pasted together get two runs.
 
 ## Not for
 
-- A call that has not happened: help the user prepare in plain chat.
+- A call that has not happened yet: prepare it in plain chat.
 - A document, an email thread, an article.
 
-## Steps
+## How it works
 
-1. **Check the input.** No transcript and no notes: stop, ask for them, write nothing.
-2. **Decide the type.** Who the counterpart is decides, never the topic: a customer asking about a new product is still `customer`. Unclear: stop and ask.
+The scripts live in this skill's folder: run them from there, with `--calls-dir` pointing at the project's `calls/`.
 
-   | Type | The counterpart | Read |
-   |---|---|---|
-   | `prospect` | evaluating whether to buy from you | `references/prospect.md` |
-   | `customer` | already pays you | `references/customer.md` |
-   | `internal` | your own team only | `references/internal.md` |
+### Stop 0, memory, input, type
 
-3. **Find the thread.** Always, even when it looks like a first call. The counterpart is the company for `prospect` and `customer`, the meeting name for `internal`. Scripts live in this skill's folder.
+Read [memory.md](memory.md) first: it holds what earlier runs got wrong.
 
-       python3 scripts/lookback.py --calls-dir calls --date YYYY-MM-DD --counterpart "Company"
+No transcript and no notes: STOP, ask for them, write nothing.
 
-   - Exit 2: this call already has a summary. Open it, add what is new, stop. Never write a second file. A real second call that day: rerun both scripts with `--second-call`.
-   - Earlier summaries listed: read the latest, carry its open actions into `## Open loops`.
-4. **Create the file.**
+Then resolve the type. **The identity of the counterpart decides, never the topic**: a paying customer asking about a new product is `customer`, whatever the user calls the call.
 
-       python3 scripts/new_summary.py --calls-dir calls --date YYYY-MM-DD --type TYPE --counterpart "Company"
+| Type | The counterpart | File |
+|---|---|---|
+| `prospect` | evaluating whether to buy from you | [variants/prospect.md](variants/prospect.md) |
+| `customer` | already pays you | [variants/customer.md](variants/customer.md) |
+| `internal` | your own team, no counterpart | [variants/internal.md](variants/internal.md) |
 
-   It prints two paths. Save the transcript, exactly as given, to the `.transcript.md` path.
-5. **Fill the summary.** Follow the variant file. Read `references/quality-bar.md` before the first quote.
-6. **Check it.**
+Type unclear: STOP and ask. Never split one call across two types.
 
-       python3 scripts/check_summary.py SUMMARY_PATH TRANSCRIPT_PATH
+### Stop 1, reload the thread
 
-   Exit 2: fix what it prints, run it again. Deliver only on exit 0.
-7. **Slack.** Read the channel from `knowledge/slack.md`. Post 3 to 5 lines: what moved, the actions with their owner, one quote. No Slack tool or no channel: print the message in chat for the user to paste.
-8. **Report.** The summary path, the check result, Slack posted or printed.
+Run the lookback, always, even when it looks like a first call. First contact is a result of this search, never a reason to skip it. The counterpart is the company for `prospect` and `customer`, the meeting name for `internal`.
+
+    python3 scripts/lookback.py --calls-dir calls --date YYYY-MM-DD --counterpart "Company"
+
+- **Exit 2**: this call already has a summary. Open it, add what is new, STOP. Never a second file for one call. A real second call that day: rerun this stop and the next with `--second-call`.
+- **Earlier summaries listed**: read the most recent, and carry its open actions into `## Open loops`.
+
+Paste the lookback line into `## Provenance` as it printed, a zero included.
+
+### Stop 2, create the file
+
+    python3 scripts/new_summary.py --calls-dir calls --date YYYY-MM-DD --type TYPE --counterpart "Company"
+
+It prints two paths. Save the transcript, exactly as given, to the `.transcript.md` one. The summary file is born from [schemas/summary-template.md](schemas/summary-template.md) with the sections of the type already in place.
+
+### Stop 3, extract
+
+Open only the variant file of the type. It declares the fields, the sections and its own STOPs. Blocks shared by several types live in `schemas/`, and the variant says when to open them.
+
+Read [worked-examples/quality-bar.md](worked-examples/quality-bar.md) before the first quote. **Every quote is verbatim**: a line that fails the quality bar is paraphrased and said to be a paraphrase.
+
+Dates, deadlines and the order between actions come from the call. An action with no date says `no date given`.
+
+### Stop 4, check
+
+    python3 scripts/check_summary.py SUMMARY_PATH TRANSCRIPT_PATH
+
+Exit 2: fix every `FAIL` line, run it again. Deliver only on exit 0.
+
+### Stop 5, Slack
+
+Read the channel from `knowledge/slack.md` in the project. Post 3 to 5 lines: what moved, the actions with their owner, the one quote worth keeping. Never the summary itself.
+
+No Slack tool or no channel file: print the message in chat for the user to paste, and say so in `## Provenance`.
+
+### Stop 6, report
+
+In chat: the summary path, the check result, Slack posted or printed, and each step skipped with its reason. A correction from the user on this run goes into [memory.md](memory.md) before the session moves on.
 
 ## Output
 
-- `calls/YYYY-MM/YYYY-MM-DD-{type}-{slug}.md`, from `assets/summary-template.md`, 200 to 1,500 words.
-- The month is the month of the call, also when you process it weeks later.
-- Deal stages, channels and other company facts come from `knowledge/`. A missing file: write what the call said and flag it in `## Provenance`.
+Primary: `calls/{YYYY-MM}/YYYY-MM-DD-{type}-{slug}.md`, 200 to 1,500 words. **`{YYYY-MM}` is the month of the call**, also when it is processed weeks later.
 
-## Gotchas
+The spine, in this order. A section the type declared and the call left empty carries `/`.
 
-- A quote from an auto-translated transcript is not verbatim. Quote only passages in their original language, paraphrase the rest and say so.
-- "Would you buy this?" gets a polite yes. Record what the counterpart did or committed to, with a date, over what they predicted they would do.
-- A friendly call is not a decision. `## Decisions` holds only what was resolved in the room.
-- Dates, deadlines and the order between actions come from the call. An action with no date says "no date given". Never infer a deadline, a dependency, or a status as of the day you process it.
-- Two calls with the same counterpart on the same day are two summaries. The same call processed twice is one: `lookback.py` tells them apart.
-- Emails and phone numbers never enter the summary. Name, role and company do.
+| Section | What it holds |
+|---|---|
+| `# H1` | one line: what happened and what moved |
+| `## Framing` | 3 to 5 lines: who they are, why this call, what it was for |
+| `## Open loops` | the actions carried from the last summary, and their state. `/` on a first call |
+| `## What happened` | the substance, as the variant asks |
+| `## Decisions` | only what was resolved in the room |
+| `## Actions` | owner and date, ours and theirs kept apart |
+| `## Quotes` | verbatim, with the speaker |
+| variant sections | in the order the variant lists them |
+| `## Next steps` | what has to happen, with its date when the call gave one |
+| `## Provenance` | the source, the lookback line, the gaps, the knowledge files missing, Slack posted or printed |
+
+Personal contact details (emails, phone numbers) never enter the summary. Name, role and company do.
+
+**STOP record.** No transcript, a type nobody can resolve, or a summary of this call already on disk: no new summary is written, the reason goes to the user in one line, and to [memory.md](memory.md).
+
+## References
+
+- What earlier runs taught, read at stop 0: [memory.md](memory.md)
+- The checks before any quote: [worked-examples/quality-bar.md](worked-examples/quality-bar.md)
+- Prospect calls: [variants/prospect.md](variants/prospect.md)
+- Customer calls: [variants/customer.md](variants/customer.md)
+- Internal calls: [variants/internal.md](variants/internal.md)
+- The summary file as it is born: [schemas/summary-template.md](schemas/summary-template.md)
+- The competitive alternative block: [schemas/market-read.md](schemas/market-read.md)
+- The thread and the duplicate guard: [scripts/lookback.py](scripts/lookback.py)
+- The path and the empty summary: [scripts/new_summary.py](scripts/new_summary.py)
+- The check before delivery: [scripts/check_summary.py](scripts/check_summary.py)

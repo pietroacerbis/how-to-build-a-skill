@@ -35,9 +35,9 @@ def body(text: str) -> str:
 
 
 def variants() -> dict:
-    """The variant set is the files in references/ that declare sections."""
+    """The variant set is the files in variants/: the folder is the set."""
     found = {}
-    for path in sorted((SKILL_DIR / "references").glob("*.md")):
+    for path in sorted((SKILL_DIR / "variants").glob("*.md")):
         sections = frontmatter(path.read_text(encoding="utf-8")).get("sections")
         if isinstance(sections, list):
             found[path.stem] = sections

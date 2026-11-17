@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Check the output before delivery. Exit 0 = ship it, exit 2 = fix what is printed and run again."""
+"""Check the output before delivery. Exit 0: deliver. Exit 2: fix every FAIL line and run again."""
 import pathlib
 import sys
 
-REQUIRED_SECTIONS = ["## [Section]"]  # the sections the template promises
+REQUIRED_SECTIONS = ["## Next steps", "## Provenance"]
 
 
 def main() -> int:
@@ -11,12 +11,12 @@ def main() -> int:
         print("usage: check.py <output-file>")
         return 2
     text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
-    errors = [f"missing section: {s}" for s in REQUIRED_SECTIONS if s not in text]
-    if "[" in text and "]" in text and "[One line" in text:
-        errors.append("template placeholder left in the output")
-    for e in errors:
-        print(f"FAIL {e}")
-    if errors:
+    fails = [f"missing section: {s}" for s in REQUIRED_SECTIONS if s not in text]
+    if "TODO" in text:
+        fails.append("a TODO from the template is still in the file")
+    for f in fails:
+        print(f"FAIL {f}")
+    if fails:
         return 2
     print("OK")
     return 0

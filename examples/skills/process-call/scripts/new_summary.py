@@ -46,8 +46,8 @@ def main() -> int:
         print(f"STOP: {path} exists. Run lookback.py, then open and extend it.")
         return 2
 
-    sections = "".join(f"## {s}\n\nTODO see references/{args.type}.md\n\n" for s in known[args.type])
-    template = (SKILL_DIR / "assets" / "summary-template.md").read_text(encoding="utf-8")
+    sections = "".join(f"## {s}\n\nTODO see variants/{args.type}.md\n\n" for s in known[args.type])
+    template = (SKILL_DIR / "schemas" / "summary-template.md").read_text(encoding="utf-8")
     text = (template.replace("{type}", args.type)
                     .replace("{date}", day.isoformat())
                     .replace("{counterpart}", args.counterpart)

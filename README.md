@@ -1,204 +1,225 @@
 # How to build a skill
 
-Ten steps from a process you run by hand to a Claude skill that runs it the same way every time. Built on the [Agent Skills standard](https://agentskills.io/specification) and its [best practices](https://agentskills.io/skill-creation/best-practices), plus what we learned running our own skills every day at [gaja](https://trygaja.com).
+This guide takes you from a process you run by hand to a Claude skill that runs it the same way every time, in ten steps. It is the format we use at [gaja](https://trygaja.com) for the skills we run every day, with a template to copy and a complete skill to read.
 
-| What | Where |
-|---|---|
-| The guide | this page |
-| The rules as a checklist | [SKILL-FORMAT.md](SKILL-FORMAT.md) |
-| An empty skill to copy | [template/my-skill/](template/my-skill/) |
-| A complete skill: variants, scripts, evals | [examples/skills/process-call/](examples/skills/process-call/) |
+- **The guide**: this page.
+- **The format**: [SKILL-FORMAT.md](SKILL-FORMAT.md), every rule in one place.
+- **The template**: [template/my-skill/](template/my-skill/), an empty skill with every folder.
+- **The example**: [examples/skills/process-call/](examples/skills/process-call/), a skill that turns a call transcript into a summary, with variants, scripts and evals.
 
 ---
 
 ## 1. What a skill is
 
-A folder of instructions, scripts and resources that Claude loads when a task needs it ([Anthropic](https://support.claude.com/en/articles/12512176-what-are-skills)).
+Anthropic's definition: *"Skills are folders of instructions, scripts, and resources that Claude loads dynamically to improve performance on specialized tasks. Skills teach Claude how to complete specific tasks in a repeatable way."* ([What are skills](https://support.claude.com/en/articles/12512176-what-are-skills))
 
-| Claude loads | When | Budget |
-|---|---|---|
-| `name` and `description` | always, for every installed skill | about 100 tokens |
-| the `SKILL.md` body | when a request matches the description | under 500 lines, 5,000 tokens |
-| `scripts/`, `references/`, `assets/` | when the body says to | as needed |
+Claude reads the name and the description of every skill it has. When a request matches one, it loads the rest of the folder. That is why a skill costs little while it waits, and why the description decides whether it ever runs.
 
-| Skill vs | The difference |
-|---|---|
-| Project knowledge | loads in every chat of the project. A skill loads only for its task |
-| MCP | gives Claude access to a tool. A skill teaches Claude your way of using it |
-| `CLAUDE.md`, custom instructions | apply to every conversation. A skill applies to one task |
+How it differs from what you already use:
 
-**Write one when** you run the same process again and again and want the same result every time.
+- **MCP** connects Claude to a tool. A skill teaches Claude how to use that tool for your process.
+- **Custom instructions and `CLAUDE.md`** apply to every conversation. A skill loads only for its task.
+
+Our own definition adds one line: **a skill is a process of yours, with one job and one output in a place it names.**
 
 ## 2. Run it by hand first
 
-Do the task with Claude in a normal chat, on real inputs, two or three times. Correct it as you go. Then write down:
+A skill written before any real run has none of the corrections that make it work. So before writing anything, do the task with Claude in a normal chat, on real inputs, more than once. Correct it as you go and keep notes on:
 
-| What you noted | What it becomes |
-|---|---|
-| the steps that worked, in order | the steps in `SKILL.md` |
-| every correction you made | the `## Gotchas` section |
-| what the input and the output looked like | the output template in `assets/` |
-| the facts you had to tell Claude | knowledge files, step 3 |
+- the steps that worked, in the order they worked
+- every correction you made, and what Claude did before it
+- what the input looked like, and what a good output looks like
+- the facts about your company you had to tell Claude
 
-- A skill written before any run has none of these, and the first real input finds the mistakes for you.
-- A skill is worth keeping when it is your process, run and corrected enough times that a run comes out right without you touching it.
+The first three become the skill. The fourth becomes knowledge, step 3.
 
-## 3. Method in the skill, facts outside
+Then keep iterating. A skill is worth keeping when it is your process, run and corrected enough times that a run comes out right without you touching it.
 
-Ask of every line: **if I changed company tomorrow, would this line change?**
+## 3. The method in the skill, the knowledge outside
 
-| Answer | It is | It lives in | Examples |
-|---|---|---|---|
-| No | method | the skill | the order of the steps, what to check, when to stop, the shape of the output |
-| Yes | knowledge | `knowledge/` at your project root, opened by the skill | your ICP, prices, tone of voice, deal stages, team names, Slack channels |
+A skill carries the **method**: the order of the steps, what to check, when to stop, the shape of the output. It never carries the **knowledge**: your ICP, your prices, your deal stages, your tone of voice, your team, your channels.
 
-- When your prices change you edit one file. A skill that copied them keeps quoting the old ones.
-- The same skill runs in any company: point it at other files, keep the skill.
+The test is one question:
+
+> If I changed company tomorrow, would this line change?
+
+| Answer | It is | It lives in |
+|---|---|---|
+| No | method | the skill |
+| Yes | knowledge | your knowledge base, a folder of markdown files the skill opens |
+
+A skill that holds knowledge breaks quietly. Your prices change, you update the prices page, and the skill that copied them keeps quoting the old ones until a customer reads the wrong number.
+
+Kept apart, the skill is invariant: the same `process-call` runs in any company, and what changes is the knowledge it opens. In the example, how to read a prospect call is in the skill, and the deal stages it maps the call to are in `knowledge/deal-stages.md`.
+
+A second test for any file inside the folder: **delete the skill, is the file still true?** If yes, it is knowledge and it moves out.
 
 ## 4. The folder
 
 ```
 my-skill/
-├── SKILL.md       required: frontmatter and instructions
-├── references/    read on a condition: variants, detailed docs
-├── assets/        templates for the output
-├── scripts/       the deterministic steps, as code
-└── evals/         test cases for claude plugin eval
+├── SKILL.md            required, the path, under 200 lines
+├── evals/              required, the test cases
+├── memory.md           required, what real runs taught
+├── variants/           one file per situation
+├── schemas/            the shape of the output, shared blocks
+├── scripts/            the deterministic steps, as code
+├── worked-examples/    a real example of the bar to meet
+└── prompts/            prompts only this skill uses
 ```
 
-| Install it in | Available |
-|---|---|
-| `.claude/skills/my-skill/` | in that project |
-| `~/.claude/skills/my-skill/` | in every project |
-
-Start from [template/my-skill/](template/my-skill/).
+Three files are required, the rest only when the skill needs them. Copy [template/my-skill/](template/my-skill/) into `.claude/skills/` in your project, or `~/.claude/skills/` for every project, and rename it.
 
 ## 5. SKILL.md
 
-**Frontmatter**
+### The frontmatter
 
-| Field | Required | Rule |
-|---|---|---|
-| `name` | yes | max 64 characters, lowercase letters, numbers and hyphens, the same as the folder |
-| `description` | yes | max 1,024 characters: what it does and when to use it. It decides when the skill fires |
-| `license`, `compatibility`, `metadata`, `allowed-tools` | no | see the [specification](https://agentskills.io/specification) |
+Each field answers a question someone will ask about the skill. Every field is in the [template](template/my-skill/SKILL.md).
 
-A description that fires when it should:
-- opens with the verb and the main use case
-- lists the words a user types: "process this call", "summarize this meeting"
-- says what it is not for
-
-**Body**
-
-| Section | What goes in |
+| Field | Answers |
 |---|---|
-| `## When to use` / `## Not for` | the boundaries |
-| `## Steps` | numbered, one action each, the script to run named in the step |
-| `## Output` | the exact path, the template in `assets/` |
-| `## Gotchas` | the corrections from your runs |
+| `name` | what it is called: a verb, kebab-case, the same as the folder |
+| `description` | when Claude should run it: verb first, the main use case first, and a `Not for:` line |
+| `when_to_use` | the phrases a user types, in any language |
+| `goal` | the intent, in one line |
+| `outcome` | the exact path of what it writes |
+| `inputs` | what it needs: `required` stops the run when missing, `recommended` lets it continue and flag the gap |
+| `tier` | who it serves: `personal`, `shared` with the team, or `infrastructure` when it writes a system everyone uses |
+| `validation` | how you know it works: `verifiable` by its evals, or `outcome-anchored` when only results over weeks can tell |
+| `status` | `draft`, `active`, `deprecated`, moved by a person, never by a date |
+| `mcps_used` | the tools it calls |
+| `feeds_into` | the skills that read its output |
 
-- **Cut what Claude already knows.** For each line: would Claude get this wrong without it? If not, delete it.
-- **A default, never a menu.** "Use X. For scanned files, use Y."
-- **Tell it when to read each file.** "Read `references/prospect.md` when the call is with a prospect."
+The `description` and `when_to_use` together stay under 1,536 characters. When in doubt, describe more: a skill that never fires is worse than one that fires too often.
+
+### The body
+
+The body is a **path**: the steps Claude walks, and the files it opens on the way. Five sections, always in this order:
+
+1. `## When to use`
+2. `## Not for`, with the skill to use instead
+3. `## How it works`, the stops, numbered from 0
+4. `## Output`, the exact path, and what happens when the skill stops
+5. `## References`, every file the skill opens, one line each
+
+Keep it under 200 lines. A longer body is carrying knowledge or examples that belong in another file. While you write it:
+
+- **Cut what Claude already knows.** For each line ask: would Claude get this wrong without it? If not, delete it.
+- **Give a default, never a menu.** "Use X. For scanned files, use Y."
+- **Explain the why** in one clause. Claude applies a rule better when it knows what the rule protects.
+
+### Stopping is an outcome
+
+Every skill writes its output where `outcome` says, or it stops and says why. A missing required input, an ambiguous case, a duplicate: each one ends the run with a one-line STOP record, never with an empty or invented output.
 
 ## 6. Variants
 
-One process, several situations: one file per situation in `references/`, chosen at the first step.
+Some processes look the same and are not. A call with a prospect and a call with a customer follow the same spine and look for different things.
 
-```markdown
-1. Decide the type of call: prospect, customer or internal.
-2. Read the file of that type in references/ and follow it.
+When the difference is in the input only, one file takes it as a parameter. When the fields, the checks or the output sections differ, each situation gets its own file in `variants/`:
+
+```
+variants/
+├── prospect.md
+├── customer.md
+└── internal.md
 ```
 
-| Same file | Separate files |
-|---|---|
-| same steps, a different input | different fields, different checks, different output sections |
-
-Example: [process-call](examples/skills/process-call/) has three, `prospect`, `customer`, `internal`.
+- **The folder is the list.** Nothing else declares the variants, so nothing can disagree with them.
+- **Stop 0 picks one** and the skill opens only that file.
+- **A skill with one situation** keeps its steps in `SKILL.md` and has no `variants/`.
 
 ## 7. Scripts
 
-**If the same input always gives the same output, it is a script**: dates, paths, counts, exact matches, format checks. Judgment stays in `SKILL.md`: which variant, what matters, what to write.
+If the same input always gives the same output, it is a script: dates, paths, counts, exact matches, format checks. Judgment stays in `SKILL.md`: which variant, what matters, what to write.
 
-| Script in the example | What it does | The mistake it removes |
+The signal is Claude rebuilding the same logic on every run, or getting a mechanical step wrong once in ten. The example has three scripts:
+
+| Script | What it does | The mistake it removes |
 |---|---|---|
 | `lookback.py` | finds earlier summaries with the same counterpart, refuses a second summary of the same call | a lost thread, a duplicate file |
-| `new_summary.py` | builds the path from the call date and writes the empty summary from the template | the wrong month in the path, sections out of order |
-| `check_summary.py` | checks every quote word for word against the transcript, the sections, the length, no emails or phone numbers | invented quotes, 4,000-word summaries, personal data |
+| `new_summary.py` | builds the path from the date of the call and writes the empty summary | a call from October filed in November |
+| `check_summary.py` | checks every quote word for word against the transcript, the sections, the length, no email or phone number | invented quotes, summaries three times too long, personal data |
 
-**The validation loop**: run the check, fix, run it again, deliver only on exit 0.
-
-When to write one: Claude rebuilds the same logic on every run.
+The last one runs as a **validation loop**: check, fix what it prints, check again, deliver only when it passes.
 
 ## 8. Evals
 
-The proof that the skill works, and that it beats Claude without it. Claude Code runs them with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals).
+Evals are the proof that the skill works, and that it does better than Claude without it. Claude Code runs them with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals): each case is a folder with the task as a user would type it, and the graders that score the result.
 
 ```
-evals/prospect-discovery/
-├── prompt.md          the task, as a user would type it
+evals/01-prospect-discovery/
+├── prompt.md
 └── graders/
-    ├── file.md        file_exists, free
-    ├── sections.md    regex on the file, free
-    └── quotes.md      llm judge, paid
+    ├── file.md         did the summary land at the right path?
+    ├── check-ran.md    did the check script run?
+    └── quotes.md       are the quotes word for word?
 ```
 
-| Grader | Checks | Cost |
-|---|---|---|
-| `regex` | text in the reply, the trace or a file | free |
-| `file_exists` | the output landed where it should | free |
-| `tool_used`, `tool_order` | the script ran, in the right order | free |
-| `llm` | what a regex cannot see: quotes are real, nothing invented, the right variant | paid, Haiku by default |
+Two kinds of grader, for two kinds of question:
 
-- Regex for the form, the LLM judge for the substance.
-- One claim per LLM grader. A judge asked four things at once voted PASS, FAIL, FAIL on a correct summary in our first run; split into one claim each, it stopped.
-- 10 to 15 cases, one for each mistake you have seen.
-- Each case runs with and without the skill. The difference in score is what the skill adds.
+- **Rules** for the form: a regex on the output, a file that must exist, a script that must run. Free, and the same answer every time.
+- **An LLM judge** for the substance: the quotes are real, nothing is invented, the right variant was picked. One claim per judge: in our first run a judge asked four things at once failed a correct summary.
+
+Write 10 to 15 cases, one for each mistake you have seen. Two or three on day one are fine, as long as they run. Each case runs with and without the skill, and the difference in score is what the skill adds.
 
 ```bash
 cd examples/skills/process-call
 claude plugin eval . --allow-tools Bash Write Edit --scaffold --no-publish
 ```
 
-One run of the 10 example cases on Sonnet: about 100 seconds and $1.20.
+One run of the 10 example cases on Sonnet takes about two minutes and costs about $1.40.
+
+A skill whose result only shows over weeks, like an outreach sequence, is `outcome-anchored`: its evals certify the form, and the replies decide the rest.
 
 ## 9. Iterate
 
-| What happens | What you do |
-|---|---|
-| you correct a run | add a line to `## Gotchas` |
-| the same correction comes back | make it a step, or a script |
-| a new kind of mistake | add an eval case that catches it |
-| the skill does not fire, or fires on the wrong request | rewrite the description |
+Every run that needs a correction teaches the skill something. `memory.md` is where it goes:
 
-A real loop from this repo: the first full run of the evals caught the example writing a deadline the call never set. One Gotcha line fixed it, and the case passed 3 runs out of 3.
+- **Read at stop 0**, so the next run starts from what the last one learned.
+- **Written** when you correct a run, when the skill stops, or when a run shows something new. One dated line each.
+- **A lesson that comes back** stops being a line in memory and becomes a step in `SKILL.md`, a script, or an eval case.
+
+| What happens | What you change |
+|---|---|
+| you correct a run | a line in `memory.md` |
+| the same correction twice | a step in `SKILL.md`, or a script |
+| a new kind of mistake | an eval case that catches it |
+| the skill does not fire, or fires on the wrong request | the `description` |
+
+`status` moves to `active` when a person has seen it run with its evals passing.
+
+A real loop from the example: the first full run of its evals caught a summary writing a deadline the call never set. One line in `memory.md`, read at stop 0, and the case passed three runs out of three.
 
 ## 10. Chains
 
-When skills always run in a row, write the order in one file and keep the logic in the skills.
+Some processes are several skills in a row: one produces what the next consumes. Write that order in a **chain**, also called an SOP, and keep it free of logic.
 
-```markdown
-# After a call
-1. process-call: the summary in calls/
-2. update-crm: the deal record           (your skill, not in this repo)
-3. follow-up-email: a draft to the client (your skill, not in this repo)
-```
+| # | Skill | Hands to the next |
+|---|---|---|
+| 1 | `list-build` | a list of accounts |
+| 2 | `icp-qualifier` | the accounts that fit your ICP |
+| 3 | `research` | a brief per account |
+| 4 | `outreach` | the first message |
 
-- The chain holds the order, each skill holds its steps.
-- Example: [examples/sops/after-a-call.md](examples/sops/after-a-call.md).
+- **The chain orders the skills, each skill orders its stops.** A rule written in the chain is a rule the skill does not know.
+- **Each step names its skip condition**, and a skip is recorded.
+- **Write it after you walked it**, like a skill: a chain you only imagined has the same problem as a skill you only imagined.
 
 ---
 
 ## Before you ship
 
-Run your skill through [SKILL-FORMAT.md](SKILL-FORMAT.md): 20 checks, format and security.
+Run your skill against [SKILL-FORMAT.md](SKILL-FORMAT.md), section 9: one checklist for the frontmatter, the folder, the body and the evals.
 
 <!-- CTA -->
 ---
 
 ## Want skills built on your own process?
 
-A skill is as good as the process and the knowledge it runs on. At gaja we build both from your calls, your CRM and your team: the knowledge your skills open, and the skills that run your GTM.
+The skill is the method. What makes it work in your company is the knowledge it opens: your ICP, your stages, your objections, your voice.
+
+We build both from your calls, your CRM and your team, on your business. Get in touch.
 
 - Pietro Acerbis, pietro@trygaja.com, [LinkedIn](https://www.linkedin.com/in/pietroacerbis-prospeiq/)
 - [trygaja.com](https://trygaja.com)

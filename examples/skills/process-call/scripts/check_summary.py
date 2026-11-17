@@ -44,7 +44,7 @@ def main() -> int:
 
     call_type = str(meta.get("type", ""))
     if call_type not in variants():
-        fails.append(f"frontmatter type '{call_type}' is not a variant in references/")
+        fails.append(f"frontmatter type '{call_type}' is not a variant in variants/")
     found = re.findall(r"(?m)^## (.+?)\s*$", content)
     wanted = expected_sections(call_type)
     missing = [s for s in wanted if s not in found]
