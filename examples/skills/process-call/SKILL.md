@@ -23,7 +23,7 @@ One skill for every call. The **type** is resolved first, and everything downstr
 
 ## How it works
 
-The scripts live in this skill's folder: run them from there, with `--calls-dir` pointing at the project's `calls/`.
+Run the scripts from the project root, never after a `cd` into this skill's folder: `${CLAUDE_SKILL_DIR}` points at the scripts, and `--calls-dir calls` at the project's `calls/`. A script stops when `calls/` would land inside the skill.
 
 ### Stop 0, memory, input, type
 
@@ -45,7 +45,7 @@ Type unclear: STOP and ask. Never split one call across two types.
 
 Run the lookback, always, even when it looks like a first call. First contact is a result of this search, never a reason to skip it. The counterpart is the company for `prospect` and `customer`, the meeting name for `internal`.
 
-    python3 scripts/lookback.py --calls-dir calls --date YYYY-MM-DD --counterpart "Company"
+    python3 ${CLAUDE_SKILL_DIR}/scripts/lookback.py --calls-dir calls --date YYYY-MM-DD --counterpart "Company"
 
 - **Exit 2**: this call already has a summary. Open it, add what is new, STOP. Never a second file for one call. A real second call that day: rerun this stop and the next with `--second-call`.
 - **Earlier summaries listed**: read the most recent, and carry its open actions into `## Open loops`.
@@ -54,7 +54,7 @@ Paste the lookback line into `## Provenance` as it printed, a zero included.
 
 ### Stop 2, create the file
 
-    python3 scripts/new_summary.py --calls-dir calls --date YYYY-MM-DD --type TYPE --counterpart "Company"
+    python3 ${CLAUDE_SKILL_DIR}/scripts/new_summary.py --calls-dir calls --date YYYY-MM-DD --type TYPE --counterpart "Company"
 
 It prints two paths. Save the transcript, exactly as given, to the `.transcript.md` one. The summary file is born from [schemas/summary-template.md](schemas/summary-template.md) with the sections of the type already in place.
 
@@ -68,7 +68,7 @@ Dates, deadlines and the order between actions come from the call. An action wit
 
 ### Stop 4, check
 
-    python3 scripts/check_summary.py SUMMARY_PATH TRANSCRIPT_PATH
+    python3 ${CLAUDE_SKILL_DIR}/scripts/check_summary.py SUMMARY_PATH TRANSCRIPT_PATH
 
 Exit 2: fix every `FAIL` line, run it again. Deliver only on exit 0.
 

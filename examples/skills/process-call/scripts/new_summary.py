@@ -24,6 +24,9 @@ def main() -> int:
     ap.add_argument("--counterpart", required=True)
     ap.add_argument("--second-call", action="store_true")
     args = ap.parse_args()
+    if SKILL_DIR in pathlib.Path(args.calls_dir).resolve().parents or pathlib.Path(args.calls_dir).resolve() == SKILL_DIR:
+        print(f"STOP: --calls-dir {args.calls_dir} resolves inside the skill folder. Run the script from the project root, never after a cd into the skill.")
+        return 2
 
     if args.type not in known:
         print(f"STOP: unknown type '{args.type}'. Known: {', '.join(known)}")

@@ -1,0 +1,14 @@
+{
+  "name": "how-to-build-a-skill",
+  "owner": {
+    "name": "Pietro Acerbis",
+    "email": "pietro@trygaja.com"
+  },
+  "plugins": [
+    {
+      "name": "how-to-build-a-skill",
+      "source": "./",
+      "description": "create-skill and review-skill, on the format of the How to build a skill guide."
+    }
+  ]
+}

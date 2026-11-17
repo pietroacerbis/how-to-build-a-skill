@@ -6,6 +6,14 @@ This guide takes you from a process you run by hand to a Claude skill that runs 
 - **The format**: [SKILL-FORMAT.md](SKILL-FORMAT.md), every rule in one place.
 - **The template**: [template/my-skill/](template/my-skill/), an empty skill with every folder.
 - **The example**: [examples/skills/process-call/](examples/skills/process-call/), a skill that turns a call transcript into a summary, with variants, scripts and evals.
+- **Two skills that do this for you**, installable as a Claude Code plugin:
+  - `create-skill` turns a process you already ran by hand into a skill folder on this format.
+  - `review-skill` checks any skill, yours or someone else's, on format and security before you install it.
+
+```
+/plugin marketplace add pietroacerbis/how-to-build-a-skill
+/plugin install how-to-build-a-skill@how-to-build-a-skill
+```
 
 ---
 
@@ -176,7 +184,7 @@ cd examples/skills/process-call
 claude plugin eval . --allow-tools Bash Write Edit --scaffold --no-publish
 ```
 
-One run of the 10 example cases on Sonnet takes about two minutes and costs about $1.40.
+One run of the 10 example cases on Sonnet takes about two minutes and costs about $1.40. The same command runs the cases of `skills/create-skill` and `skills/review-skill`, from their folders.
 
 A skill whose result only shows over weeks, like an outreach sequence, is `outcome-anchored`: its evals certify the form, and the replies decide the rest.
 
@@ -218,7 +226,9 @@ Some processes are several skills in a row: one produces what the next consumes.
 
 ## Before you ship
 
-Run your skill against [SKILL-FORMAT.md](SKILL-FORMAT.md), section 9: one checklist for the frontmatter, the folder, the body and the evals.
+Ask `review-skill` to review it, or walk [SKILL-FORMAT.md](SKILL-FORMAT.md) section 9 by hand: one checklist for the frontmatter, the folder, the body and the evals.
+
+Do the same before installing a skill you did not write. A skill runs with your permissions, so `review-skill` reads every file for hidden instructions, secrets read and data sent out, and never runs any of them. Its verdict is one of three: install, fix first, or do not install.
 
 <!-- CTA -->
 ---

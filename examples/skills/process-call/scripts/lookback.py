@@ -11,7 +11,7 @@ import argparse
 import pathlib
 import sys
 
-from _common import frontmatter, slugify
+from _common import SKILL_DIR, frontmatter, slugify
 
 
 def main() -> int:
@@ -21,6 +21,9 @@ def main() -> int:
     ap.add_argument("--counterpart", required=True)
     ap.add_argument("--second-call", action="store_true")
     args = ap.parse_args()
+    if SKILL_DIR in pathlib.Path(args.calls_dir).resolve().parents or pathlib.Path(args.calls_dir).resolve() == SKILL_DIR:
+        print(f"STOP: --calls-dir {args.calls_dir} resolves inside the skill folder. Run the script from the project root, never after a cd into the skill.")
+        return 2
 
     slug = slugify(args.counterpart)
     hits = []

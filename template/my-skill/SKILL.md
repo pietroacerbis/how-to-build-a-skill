@@ -32,7 +32,7 @@ One action. Name the file it opens or the script it runs, and why.
 
 ### Stop 2, check before delivery
 
-Run `python3 scripts/check.py <output>`. Exit 2: fix what it prints, run it again. Deliver only on exit 0.
+Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check.py <output>`. Exit 2: fix what it prints, run it again. Deliver only on exit 0.
 
 ## Output
 
@@ -46,3 +46,4 @@ Run `python3 scripts/check.py <output>`. Exit 2: fix what it prints, run it agai
 - The shape of the output: [schemas/output-format.md](schemas/output-format.md)
 - The check before delivery: [scripts/check.py](scripts/check.py)
 - The bar to meet: [worked-examples/example.md](worked-examples/example.md)
+- A prompt only this skill sends: [prompts/prompt-name.md](prompts/prompt-name.md)

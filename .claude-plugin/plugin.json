@@ -1,0 +1,12 @@
+{
+  "name": "how-to-build-a-skill",
+  "version": "1.0.0",
+  "description": "Two skills for skill authors: create-skill turns a process you already ran by hand into a skill folder, review-skill checks any skill, yours or a third party's, on format and security before you install it.",
+  "author": {
+    "name": "Pietro Acerbis",
+    "email": "pietro@trygaja.com"
+  },
+  "homepage": "https://github.com/pietroacerbis/how-to-build-a-skill",
+  "license": "MIT",
+  "keywords": ["skills", "skill-authoring", "evals", "security"]
+}
