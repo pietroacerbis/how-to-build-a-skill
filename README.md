@@ -235,7 +235,7 @@ Do the same before installing a skill you did not write. A skill runs with your 
 This repository is one of three:
 
 - How to build a skill: this one.
-- [Claude personal memory](https://github.com/pietroacerbis/claude-personal-memory): Claude that remembers who you are and what you corrected, in plain files you own.
+- [Claude personal memory](https://github.com/pietroacerbis/claude-personal-memory): a small personal brain in plain files you own. Claude remembers who you are, your goals and what you corrected.
 - [Claude Code daily](https://github.com/pietroacerbis/claude-code-daily): the Claude Code tools I use every day, by category, with the install lines.
 
 <!-- CTA -->
