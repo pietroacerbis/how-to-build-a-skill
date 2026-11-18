@@ -247,7 +247,7 @@ The skill is the method. What makes it work in your company is the knowledge it 
 
 We build both from your calls, your CRM and your team, on your business. Get in touch.
 
-- Pietro Acerbis, pietro@trygaja.com, [LinkedIn](https://www.linkedin.com/in/pietroacerbis-prospeiq/)
+- Pietro Acerbis, pietro@trygaja.com, [LinkedIn](https://www.linkedin.com/in/pietroacerbis-gaja/)
 - [trygaja.com](https://trygaja.com)
 
 MIT licence.
