@@ -251,7 +251,7 @@ At gaja we build two things for go-to-market teams:
 
 Get in touch:
 
-- Pietro Acerbis, Founder at gaja: pietro@trygaja.com, [LinkedIn](https://www.linkedin.com/in/pietroacerbis-gaja/)
+- Pietro Acerbis, Co-founder at gaja: pietro@trygaja.com, [LinkedIn](https://www.linkedin.com/in/pietroacerbis-gaja/)
 - gaja: [trygaja.com](https://trygaja.com), [LinkedIn](https://www.linkedin.com/company/gaja-brain/)
 
 MIT licence.
