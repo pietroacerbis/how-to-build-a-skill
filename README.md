@@ -236,7 +236,7 @@ This repository is one of three:
 
 - How to build a skill: this one.
 - [Claude personal memory](https://github.com/pietroacerbis/claude-personal-memory): Claude that remembers who you are and what you corrected, in plain files you own.
-- [Claude Code plugins](https://github.com/pietroacerbis/claude-code-plugins): the plugins we use, and others worth trying, by category.
+- [Claude Code daily](https://github.com/pietroacerbis/claude-code-daily): the Claude Code tools I use every day, by category, with the install lines.
 
 <!-- CTA -->
 ---
